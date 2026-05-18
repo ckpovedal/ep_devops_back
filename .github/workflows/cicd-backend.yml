@@ -43,12 +43,15 @@ jobs:
           host: ${{ secrets.EC2_BACKEND_HOST }}
           username: ${{ secrets.EC2_BACKEND_USER }}
           key: ${{ secrets.EC2_BACKEND_SSH_KEY }}
+          proxy_host: ${{ secrets.EC2_FRONTEND_HOST }}
+          proxy_username: ${{ secrets.EC2_FRONTEND_USER }}
+          proxy_key: ${{ secrets.EC2_FRONTEND_SSH_KEY }}
           script: |
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-            docker pull ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY_BACKEND }}:${{ env.IMAGE_TAG }}
-            docker stop pacientes-app || true
-            docker rm pacientes-app || true
-            docker run -d \
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+            sudo docker pull ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY_BACKEND }}:${{ env.IMAGE_TAG }}
+            sudo docker stop pacientes-app ec2-user-backend-1 backend || true
+            sudo docker rm pacientes-app ec2-user-backend-1 backend || true
+            sudo docker run -d \
               --name pacientes-app \
               --restart always \
               -p 8080:8080 \
